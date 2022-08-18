@@ -45,6 +45,7 @@ class Labeler(tk.Tk):
         if self.hasChanged.get():
             self.sortDict()
 
+        #Handle StopIteration Exception when the iterator gets to the end, this currently take two clicks on "next" to show the first image again (but who cares)
         try:
             old_currentkey = self.currentkey
             self.currentkey = next(self.iterator)
@@ -58,19 +59,23 @@ class Labeler(tk.Tk):
             if os.path.exists(os.path.join(self.dir.get(), self.currentkey + type)):
                 #load images
                 self.currentImage = Image.open(os.path.join(self.dir.get(), self.currentkey + type))
+
                 #resize
                 ratio = min(self.grid_bbox(0,0)[2]/self.currentImage.size[0], self.grid_bbox(0,0)[3]/self.currentImage.size[1])
                 self.currentImage = self.currentImage.resize((int(self.currentImage.size[0]*ratio), int(self.currentImage.size[1]*ratio)))
                 self.currentImage = ImageTk.PhotoImage(self.currentImage)
+
                 self.imageLabel.configure(image=self.currentImage)
                 self.imageLabel.image = self.currentImage
 
+                #reset label values to "uncheck"
+                self.signalnoise = -1
+                self.confidence = -1
                 #load label values if applicable
                 if "signalnoise" in self.imageDict[self.currentkey]:
                     self.signalnoise.set(int(self.imageDict[self.currentkey]["signal"]))
                 if "confidence" in self.imageDict[self.currentkey]:
                     self.confidence.set(self.imageDict[self.currentkey]["confidence"])
-                #TODO: update radiobuttons
                 break
 
     def save(self):
@@ -94,9 +99,12 @@ class Labeler(tk.Tk):
         self.hasChanged.set(True)
 
     def updateInfoString(self):
+        #default for when no dir has been selected
         if self.dir.get() == "":
             infoString1 = "No Directory Selected"
             infoString2 = "Images: -"
+
+        #
         else:
             imagecount = len([f for f in os.listdir(self.dir.get()) if f.endswith('.png') or f.endswith('.jpg') or f.endswith('.gif')])
             infoString1 = "Directory: " + self.dir.get()
@@ -112,7 +120,6 @@ class Labeler(tk.Tk):
         self.tk.call('source', 'azure.tcl')
         style.theme_use('azure')
 
-
         self.dir = tk.StringVar()
         self.dir.set("")
         self.dir.trace('w', self.loadImages)
@@ -126,6 +133,7 @@ class Labeler(tk.Tk):
         self.hasChanged.set(True)
         self.infoString1, self.infoString2 = self.updateInfoString()
 
+        #only boring layouting beyond this point
 
         self.columnconfigure(0, weight=3, uniform='column')
         self.columnconfigure(1, weight=1, uniform='column')
@@ -171,10 +179,8 @@ class Labeler(tk.Tk):
         self.savebutton.pack(side='top', anchor='w', pady=15)
         self.exitbutton.pack(side='top', anchor='w', pady=0)
 
-
-
+        #load the "please select directory" image
         self.defaultImage = Image.open("defaultImage.png")
-
         self.defaultImage = ImageTk.PhotoImage(self.defaultImage.resize((800, 500)))
         self.imageLabel = tk.Label(self, image=self.defaultImage, bg="blue4")
         self.imageLabel.image = self.defaultImage
@@ -195,4 +201,10 @@ if __name__ == '__main__':
 #TODO Missing functionality:
 
 #increase Font Size
+#automatically uncheck
+#error for unfinished input
+#lastimage button
+#textfield für direktes ansprechen
+#name des raters
 
+#cant read I button basic no such elemt in array
