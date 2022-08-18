@@ -69,18 +69,29 @@ class Labeler(tk.Tk):
                 self.imageLabel.image = self.currentImage
 
                 #reset label values to "uncheck"
-                self.signalnoise = -1
-                self.confidence = -1
+                self.signalnoise.set(-1)
+                self.confidence.set(-1)
+                self.noisetype.set("")
                 #load label values if applicable
                 if "signalnoise" in self.imageDict[self.currentkey]:
                     self.signalnoise.set(int(self.imageDict[self.currentkey]["signal"]))
                 if "confidence" in self.imageDict[self.currentkey]:
                     self.confidence.set(self.imageDict[self.currentkey]["confidence"])
+                if "noisetype" in self.imageDict[self.currentkey]:
+                    self.noisetype.set(self.imageDict[self.currentkey]["confidence"])
+
+                #disable noistype buttons if no noise is preloaded
+                for noisetype in self.noisetypebuttons:
+                    noisetype["state"] = "disable"
                 break
 
     def save(self):
-        self.imageDict[self.currentkey]["confidence"] = self.confidence.get()
-        self.imageDict[self.currentkey]["signal"] = self.signalnoise.get()
+        if self.confidence.get() != -1:
+            self.imageDict[self.currentkey]["confidence"] = self.confidence.get()
+        if self.signalnoise.get() != -1:
+            self.imageDict[self.currentkey]["signal"] = bool(self.signalnoise.get())
+        if self.noisetype.get() != "":
+            self.imageDict[self.currentkey]["noisetype"] = self.noisetype.get()
         out_file = open(self.dir.get() + "/labels.json", 'w')
         json.dump(self.imageDict, out_file)
         out_file.close()
@@ -90,6 +101,7 @@ class Labeler(tk.Tk):
         if self.currentkey != "":
             self.imageDict[self.currentkey]["confidence"] = self.confidence.get()
             self.imageDict[self.currentkey]["signal"] = bool(self.signalnoise.get())
+            self.imageDict[self.currentkey]["noisetype"] = self.noisetype.get()
             out_file = open(self.dir.get() + "/labels.json", 'w')
             json.dump(self.imageDict, out_file)
             out_file.close()
@@ -97,6 +109,14 @@ class Labeler(tk.Tk):
 
     def change(self):
         self.hasChanged.set(True)
+        if self.signalnoise.get() == 0:
+            for noisetype in self.noisetypebuttons:
+                noisetype["state"] = "normal"
+        if self.signalnoise.get() == 1:
+            self.noisetype.set("")
+            for noisetype in self.noisetypebuttons:
+                noisetype["state"] = "disable"
+
 
     def updateInfoString(self):
         #default for when no dir has been selected
@@ -129,6 +149,7 @@ class Labeler(tk.Tk):
         self.imageDict = {}
         self.imagePilList = []
         self.currentkey = ""
+        self.noisetype = tk.StringVar()
         self.hasChanged = tk.BooleanVar()
         self.hasChanged.set(True)
         self.infoString1, self.infoString2 = self.updateInfoString()
@@ -151,6 +172,23 @@ class Labeler(tk.Tk):
         self.signalbutton = ttk.Radiobutton(self.label_frame, text="Signal", variable=self.signalnoise, value=1, command=self.change)
         self.noisebutton = ttk.Radiobutton(self.label_frame, text="Noise", variable=self.signalnoise, value=0, command=self.change)
 
+        self.noisetypelabel = ttk.Label(self.label_frame, text="Noise Type:")
+        self.noisetypebutton1 = ttk.Radiobutton(self.label_frame, text="Unknown", variable=self.noisetype, value="unknown")
+        self.noisetypebutton2 = ttk.Radiobutton(self.label_frame, text="Movement", variable=self.noisetype, value="movement")
+        self.noisetypebutton3 = ttk.Radiobutton(self.label_frame, text="Non-Brain", variable=self.noisetype, value="non-brain")
+        self.noisetypebutton4 = ttk.Radiobutton(self.label_frame, text="White Matter", variable=self.noisetype, value="white matter")
+        self.noisetypebutton5 = ttk.Radiobutton(self.label_frame, text="MRI", variable=self.noisetype, value="mri")
+        self.noisetypebutton6 = ttk.Radiobutton(self.label_frame, text="Susceptibility Motion", variable=self.noisetype, value="susceptibility motion")
+        self.noisetypebutton7 = ttk.Radiobutton(self.label_frame, text="Respiratory", variable=self.noisetype, value="respiratory")
+        self.noisetypebutton8 = ttk.Radiobutton(self.label_frame, text="Cardiac", variable=self.noisetype, value="cardiac")
+        self.noisetypebutton9 = ttk.Radiobutton(self.label_frame, text="Sagittal Sinus", variable=self.noisetype, value="sagittal sinus")
+
+        #for iteration
+        self.noisetypebuttons = [self.noisetypebutton1, self.noisetypebutton2, self.noisetypebutton3, self.noisetypebutton4,
+                              self.noisetypebutton5, self.noisetypebutton6, self.noisetypebutton7, self.noisetypebutton8,
+                              self.noisetypebutton9]
+
+
         self.conf1 = ttk.Radiobutton(self.label_frame, text="1", variable=self.confidence, value=1, command=self.change)
         self.conf2 = ttk.Radiobutton(self.label_frame, text="2", variable=self.confidence, value=2, command=self.change)
         self.conf3 = ttk.Radiobutton(self.label_frame, text="3", variable=self.confidence, value=3, command=self.change)
@@ -170,11 +208,21 @@ class Labeler(tk.Tk):
         self.spacinglabel1.pack(side='top', anchor='w', pady=10)
         self.signalbutton.pack(side='top', anchor='w', pady=0)
         self.noisebutton.pack(side='top', anchor='w', pady=3)
+        self.noisetypelabel.pack(side='top', anchor='w', pady=2, padx=5)
+        self.noisetypebutton1.pack(side='top', anchor='w', pady=2, padx=35)
+        self.noisetypebutton2.pack(side='top', anchor='w', pady=2, padx=35)
+        self.noisetypebutton3.pack(side='top', anchor='w', pady=2, padx=35)
+        self.noisetypebutton4.pack(side='top', anchor='w', pady=2, padx=35)
+        self.noisetypebutton5.pack(side='top', anchor='w', pady=2, padx=35)
+        self.noisetypebutton6.pack(side='top', anchor='w', pady=2, padx=35)
+        self.noisetypebutton7.pack(side='top', anchor='w', pady=2, padx=35)
+        self.noisetypebutton8.pack(side='top', anchor='w', pady=2, padx=35)
+        self.noisetypebutton9.pack(side='top', anchor='w', pady=2, padx=35)
         self.spacinglabel2.pack(side='top', anchor='w', pady=5)
         self.confidenceLabel.pack(side='top', anchor='w', pady=5)
-        self.conf1.pack(side='top', anchor='center', pady=1)
-        self.conf2.pack(side='top',  anchor='center', pady=1)
-        self.conf3.pack(side='top',  anchor='center', pady=1)
+        self.conf1.pack(side='top', anchor='w', pady=1, padx=35)
+        self.conf2.pack(side='top',  anchor='w', pady=1, padx=35)
+        self.conf3.pack(side='top',  anchor='w', pady=1, padx=35)
         self.spacinglabel3.pack(side='top', anchor='w', pady=5)
         self.savebutton.pack(side='top', anchor='w', pady=15)
         self.exitbutton.pack(side='top', anchor='w', pady=0)
@@ -182,7 +230,7 @@ class Labeler(tk.Tk):
         #load the "please select directory" image
         self.defaultImage = Image.open("defaultImage.png")
         self.defaultImage = ImageTk.PhotoImage(self.defaultImage.resize((800, 500)))
-        self.imageLabel = tk.Label(self, image=self.defaultImage, bg="blue4")
+        self.imageLabel = tk.Label(self, image=self.defaultImage)
         self.imageLabel.image = self.defaultImage
         self.imageLabel.grid(column=0, row=0)
 
@@ -201,9 +249,9 @@ if __name__ == '__main__':
 #TODO Missing functionality:
 
 #increase Font Size
-#automatically uncheck
 #error for unfinished input
 #lastimage button
+#currentimage label
 #textfield für direktes ansprechen
 #name des raters
 
