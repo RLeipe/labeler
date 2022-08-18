@@ -1,6 +1,7 @@
 import json
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import ttk
 import os, os.path
 from PIL import Image, ImageTk
 from collections import OrderedDict
@@ -24,14 +25,14 @@ class Labeler(tk.Tk):
                     for key in existingDict:
                         self.imageDict[key] = existingDict[key]
 
-        self.infoString = self.updateInfoString()
-        self.dirinfo.configure(text=self.infoString)
+        self.infoString1, self.infoString2 = self.updateInfoString()
+        self.dirinfo1.configure(text=self.infoString1)
+        self.dirinfo2.configure(text=self.infoString2)
         self.showNextImage()
 
     def selectDir(self):
         filepath = filedialog.askdirectory()
         self.dir.set(filepath)
-        # todo: display chosen path somewhere in the frame
 
     def sortDict(self):
         tuples = [(key, self.imageDict[key]) for key in self.imageDict]
@@ -66,7 +67,7 @@ class Labeler(tk.Tk):
 
                 #load label values if applicable
                 if "signalnoise" in self.imageDict[self.currentkey]:
-                    self.signalnoise.set(self.imageDict[self.currentkey]["signal"])
+                    self.signalnoise.set(int(self.imageDict[self.currentkey]["signal"]))
                 if "confidence" in self.imageDict[self.currentkey]:
                     self.confidence.set(self.imageDict[self.currentkey]["confidence"])
                 #TODO: update radiobuttons
@@ -83,7 +84,7 @@ class Labeler(tk.Tk):
     def saveexit(self):
         if self.currentkey != "":
             self.imageDict[self.currentkey]["confidence"] = self.confidence.get()
-            self.imageDict[self.currentkey]["signal"] = self.signalnoise.get()
+            self.imageDict[self.currentkey]["signal"] = bool(self.signalnoise.get())
             out_file = open(self.dir.get() + "/labels.json", 'w')
             json.dump(self.imageDict, out_file)
             out_file.close()
@@ -94,29 +95,36 @@ class Labeler(tk.Tk):
 
     def updateInfoString(self):
         if self.dir.get() == "":
-            infoString = "No Directory Selected"
+            infoString1 = "No Directory Selected"
+            infoString2 = "Images: -"
         else:
             imagecount = len([f for f in os.listdir(self.dir.get()) if f.endswith('.png') or f.endswith('.jpg') or f.endswith('.gif')])
-            infoString = "Directory: " + self.dir.get() + ", Images: " + str(imagecount)
-        return infoString
+            infoString1 = "Directory: " + self.dir.get()
+            infoString2 = "Images: " + str(imagecount)
+        return infoString1, infoString2
 
     def __init__(self):
         super().__init__()
         self.title("Labeler")
         self.geometry("1536x864")
         self.configure(background="white")
+        style = ttk.Style(self)
+        self.tk.call('source', 'azure.tcl')
+        style.theme_use('azure')
+
 
         self.dir = tk.StringVar()
         self.dir.set("")
         self.dir.trace('w', self.loadImages)
-        self.signalnoise = tk.BooleanVar()
+        self.signalnoise = tk.IntVar()
+        self.signalnoise.set(2)
         self.confidence = tk.IntVar()
         self.imageDict = {}
         self.imagePilList = []
         self.currentkey = ""
         self.hasChanged = tk.BooleanVar()
         self.hasChanged.set(True)
-        self.infoString = self.updateInfoString()
+        self.infoString1, self.infoString2 = self.updateInfoString()
 
 
         self.columnconfigure(0, weight=3, uniform='column')
@@ -128,39 +136,42 @@ class Labeler(tk.Tk):
         self.label_frame.configure(background="white")
 
 
-        self.dirButton = tk.Button(self.label_frame, text="Select Image Directory", command=self.selectDir)
-        self.dirinfo = tk.Label(self.label_frame, text=self.infoString)
+        self.dirButton = ttk.Button(self.label_frame, text="Select Image Directory", command=self.selectDir)
+        self.dirinfo1 = ttk.Label(self.label_frame, text=self.infoString1)
+        self.dirinfo2 = ttk.Label(self.label_frame, text=self.infoString2)
 
-        self.signalbutton = tk.Radiobutton(self.label_frame, text="Signal", variable=self.signalnoise, value=True, command=self.change)
-        self.noisebutton = tk.Radiobutton(self.label_frame, text="Noise", variable=self.signalnoise, value=False, command=self.change)
+        self.signalbutton = ttk.Radiobutton(self.label_frame, text="Signal", variable=self.signalnoise, value=1, command=self.change)
+        self.noisebutton = ttk.Radiobutton(self.label_frame, text="Noise", variable=self.signalnoise, value=0, command=self.change)
 
-        self.conf1 = tk.Radiobutton(self.label_frame, text="1", variable=self.confidence, value=1, command=self.change)
-        self.conf2 = tk.Radiobutton(self.label_frame, text="2", variable=self.confidence, value=2, command=self.change)
-        self.conf3 = tk.Radiobutton(self.label_frame, text="3", variable=self.confidence, value=3, command=self.change)
+        self.conf1 = ttk.Radiobutton(self.label_frame, text="1", variable=self.confidence, value=1, command=self.change)
+        self.conf2 = ttk.Radiobutton(self.label_frame, text="2", variable=self.confidence, value=2, command=self.change)
+        self.conf3 = ttk.Radiobutton(self.label_frame, text="3", variable=self.confidence, value=3, command=self.change)
 
-        self.savebutton = tk.Button(self.label_frame, text="Next", command=self.save)
-        self.exitbutton = tk.Button(self.label_frame, text="Save & Exit", command=self.saveexit)
+        self.savebutton = ttk.Button(self.label_frame, text="Next", command=self.save)
+        self.exitbutton = ttk.Button(self.label_frame, text="Save & Exit", command=self.saveexit)
 
-        self.dirButton.pack(side='top', pady=15)
-        self.dirinfo.pack(side='top', pady = 0)
-        self.signalbutton.pack(side='top', pady=15)
-        self.noisebutton.pack(side='top', pady=15)
-
-        self.conf1.pack(side='top', pady=3)
-        self.conf2.pack(side='top',  pady=3)
-        self.conf3.pack(side='top',  pady=3)
-        self.savebutton.pack(side='top', pady=15)
-        self.exitbutton.pack(side='top', pady=15)
+        self.spacinglabel1 = ttk.Label(self.label_frame)
+        self.spacinglabel2 = ttk.Label(self.label_frame)
+        self.spacinglabel3 = ttk.Label(self.label_frame)
+        self.confidenceLabel = ttk.Label(self.label_frame, text="Confidence:")
 
 
-        #self.dirButton.grid(column=1, row=0)
-        #self.signalbutton.grid(column=1, row=0)
-        #self.noisebutton.grid(column=1, row=0)
-        #self.conf1.grid(column=1, row=0)
-        #self.conf2.grid(column=1, row=0)
-        #self.conf3.grid(column=1, row=0)
-        #self.savebutton.grid(column=1, row=0)
-        #self.exitbutton.grid(column=1, row=0)
+        self.dirButton.pack(side='top', anchor='w', pady=10)
+        self.dirinfo1.pack(side='top', anchor='w', pady = 0)
+        self.dirinfo2.pack(side='top', anchor='w', pady = 1)
+        self.spacinglabel1.pack(side='top', anchor='w', pady=10)
+        self.signalbutton.pack(side='top', anchor='w', pady=0)
+        self.noisebutton.pack(side='top', anchor='w', pady=3)
+        self.spacinglabel2.pack(side='top', anchor='w', pady=5)
+        self.confidenceLabel.pack(side='top', anchor='w', pady=5)
+        self.conf1.pack(side='top', anchor='center', pady=1)
+        self.conf2.pack(side='top',  anchor='center', pady=1)
+        self.conf3.pack(side='top',  anchor='center', pady=1)
+        self.spacinglabel3.pack(side='top', anchor='w', pady=5)
+        self.savebutton.pack(side='top', anchor='w', pady=15)
+        self.exitbutton.pack(side='top', anchor='w', pady=0)
+
+
 
         self.defaultImage = Image.open("defaultImage.png")
 
@@ -181,7 +192,7 @@ if __name__ == '__main__':
     self.mainloop()
 
 
-#Missing functionality:
+#TODO Missing functionality:
 
-#layouting
+#increase Font Size
 
