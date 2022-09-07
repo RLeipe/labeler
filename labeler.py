@@ -75,13 +75,10 @@ class Labeler(tk.Tk):
 
                 #reset label values to "uncheck"
                 self.signalnoise.set(-1)
-                self.confidence.set(-1)
                 self.noisetype.set("")
                 #load label values if applicable
                 if "signal" in self.imageDict[self.currentkey]:
                     self.signalnoise.set(self.imageDict[self.currentkey]["signal"])
-                if "confidence" in self.imageDict[self.currentkey]:
-                    self.confidence.set(self.imageDict[self.currentkey]["confidence"])
                 if "noisetype" in self.imageDict[self.currentkey]:
                     self.noisetype.set(self.imageDict[self.currentkey]["noisetype"])
 
@@ -93,8 +90,6 @@ class Labeler(tk.Tk):
                 break
 
     def save(self):
-        if self.confidence.get() != -1:
-            self.imageDict[self.currentkey]["confidence"] = self.confidence.get()
         if self.signalnoise.get() != -1:
             self.imageDict[self.currentkey]["signal"] = self.signalnoise.get()
         if self.noisetype.get() != "":
@@ -111,7 +106,6 @@ class Labeler(tk.Tk):
 
     def saveexit(self):
         if self.currentkey != "":
-            self.imageDict[self.currentkey]["confidence"] = self.confidence.get()
             self.imageDict[self.currentkey]["signal"] = self.signalnoise.get()
             self.imageDict[self.currentkey]["noisetype"] = self.noisetype.get()
             out_file = open(self.dir.get() + "/" + self.username.get() + ".json", 'w')
@@ -159,7 +153,6 @@ class Labeler(tk.Tk):
         self.dir.trace('w', self.loadImages)
         self.signalnoise = tk.IntVar()
         self.signalnoise.set(2)
-        self.confidence = tk.IntVar()
         self.imageDict = {}
         self.imagePilList = []
         self.currentkey = ""
@@ -215,10 +208,6 @@ class Labeler(tk.Tk):
                               self.noisetypebutton9]
 
 
-        self.conf1 = ttk.Radiobutton(self.label_frame, text="[q] 1", variable=self.confidence, value=1, command=self.change)
-        self.conf2 = ttk.Radiobutton(self.label_frame, text="[w] 2", variable=self.confidence, value=2, command=self.change)
-        self.conf3 = ttk.Radiobutton(self.label_frame, text="[e] 3", variable=self.confidence, value=3, command=self.change)
-
         self.nextbutton = ttk.Button(self.navbuttonframe, text="Next", command=self.save)
         self.previousbutton = ttk.Button(self.navbuttonframe, text="Previous", command=self.previous)
         self.exitbutton = ttk.Button(self.navbuttonframe, text="Save & Exit", command=self.saveexit)
@@ -228,7 +217,6 @@ class Labeler(tk.Tk):
         self.spacinglabel1 = ttk.Label(self.label_frame)
         self.spacinglabel2 = ttk.Label(self.label_frame)
         self.spacinglabel3 = ttk.Label(self.label_frame)
-        self.confidenceLabel = ttk.Label(self.label_frame, text="Confidence:")
 
         self.nameentrylabel.pack(side="left", pady=5)
         self.nameentry.pack(side="left", pady=5, padx = 20)
@@ -250,10 +238,7 @@ class Labeler(tk.Tk):
         self.noisetypebutton8.pack(side='top', anchor='w', pady=2, padx=35)
         self.noisetypebutton9.pack(side='top', anchor='w', pady=2, padx=35)
         self.spacinglabel2.pack(side='top', anchor='w', pady=5)
-        self.confidenceLabel.pack(side='top', anchor='w', pady=5)
-        self.conf1.pack(side='top', anchor='w', pady=1, padx=35)
-        self.conf2.pack(side='top',  anchor='w', pady=1, padx=35)
-        self.conf3.pack(side='top',  anchor='w', pady=1, padx=35)
+
         self.spacinglabel3.pack(side='top', anchor='w', pady=5)
         self.nextbutton.pack(side='left', anchor='w', padx=2)
         self.previousbutton.pack(side='left', anchor='w', padx=2)
@@ -279,9 +264,6 @@ class Labeler(tk.Tk):
         self.bind("7", lambda event: self.noisetypebutton7.invoke())
         self.bind("8", lambda event: self.noisetypebutton8.invoke())
         self.bind("9", lambda event: self.noisetypebutton9.invoke())
-        self.bind("q", lambda event: self.conf1.invoke())
-        self.bind("w", lambda event: self.conf2.invoke())
-        self.bind("e", lambda event: self.conf3.invoke())
 
 
 
