@@ -294,7 +294,6 @@ if __name__ == '__main__':
 
 #error for unfinished input
 #textfield für direktes ansprechen
-#name des raters
-#hotkeys
+
 
 #cant read I button basic no such elemt in array
