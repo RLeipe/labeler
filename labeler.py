@@ -37,7 +37,8 @@ class Labeler(tk.Tk):
 
     def sortDict(self):
         tuples = [(key, self.imageDict[key]) for key in self.imageDict]
-        self.imageDict = OrderedDict(sorted(tuples, key=lambda x: (len(x[1]), int(''.join(filter(str.isdigit, x[0])))), reverse=False))
+
+        self.imageDict = OrderedDict(sorted(tuples, key=lambda x: (len(x[1]), int(x[0][:5])), reverse=False))
         self.iterator = iter(self.imageDict)
         self.hasChanged.set(False)
 
