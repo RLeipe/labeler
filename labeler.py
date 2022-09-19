@@ -37,7 +37,7 @@ class Labeler(tk.Tk):
 
     def sortDict(self):
         tuples = [(key, self.imageDict[key]) for key in self.imageDict]
-        self.imageDict = OrderedDict(sorted(tuples, key=lambda x: len(x[1]), reverse=False))
+        self.imageDict = OrderedDict(sorted(tuples, key=lambda x: (len(x[1]), int(''.join(filter(str.isdigit, x[0])))), reverse=False))
         self.iterator = iter(self.imageDict)
         self.hasChanged.set(False)
 
@@ -86,14 +86,12 @@ class Labeler(tk.Tk):
                 if self.signalnoise.get() != 0:
                     for noisetype in self.noisetypebuttons:
                         noisetype["state"] = "disable"
-                self.imageinfoString.set("Current Image: " + self.currentkey)
                 break
 
     def save(self):
         if self.signalnoise.get() != -1:
             self.imageDict[self.currentkey]["signal"] = self.signalnoise.get()
-        if self.noisetype.get() != "":
-            self.imageDict[self.currentkey]["noisetype"] = self.noisetype.get()
+        self.imageDict[self.currentkey]["noisetype"] = self.noisetype.get()
         out_file = open(self.dir.get() + "/" + self.username.get() + ".json", 'w')
         json.dump(self.imageDict, out_file)
         out_file.close()
@@ -118,10 +116,12 @@ class Labeler(tk.Tk):
         if self.signalnoise.get() == 0:
             for noisetype in self.noisetypebuttons:
                 noisetype["state"] = "normal"
-        if self.signalnoise.get() == 1:
+        if self.signalnoise.get() == 1 or self.signalnoise.get() == 2:
             self.noisetype.set("")
             for noisetype in self.noisetypebuttons:
                 noisetype["state"] = "disable"
+
+
 
 
     def updateInfoString(self):
@@ -152,7 +152,7 @@ class Labeler(tk.Tk):
         self.dir.set("")
         self.dir.trace('w', self.loadImages)
         self.signalnoise = tk.IntVar()
-        self.signalnoise.set(2)
+        self.signalnoise.set(-1)
         self.imageDict = {}
         self.imagePilList = []
         self.currentkey = ""
@@ -161,8 +161,6 @@ class Labeler(tk.Tk):
         self.hasChanged = tk.BooleanVar()
         self.hasChanged.set(True)
         self.infoString1, self.infoString2 = self.updateInfoString()
-        self.imageinfoString = tk.StringVar()
-        self.imageinfoString.set("Current Image: -")
         self.gotoprevious = False
 
         #only boring layouting beyond this point
@@ -186,10 +184,10 @@ class Labeler(tk.Tk):
         self.dirButton = ttk.Button(self.label_frame, text="Select Image Directory", command=self.selectDir)
         self.dirinfo1 = ttk.Label(self.label_frame, text=self.infoString1)
         self.dirinfo2 = ttk.Label(self.label_frame, text=self.infoString2)
-        self.imageinfo = ttk.Label(self.label_frame, textvariable=self.imageinfoString)
 
         self.signalbutton = ttk.Radiobutton(self.label_frame, text="[s] Signal", variable=self.signalnoise, value=1, command=self.change)
         self.noisebutton = ttk.Radiobutton(self.label_frame, text="[n] Noise", variable=self.signalnoise, value=0, command=self.change)
+        self.faultybutton = ttk.Radiobutton(self.label_frame, text="[f] Faulty", variable=self.signalnoise, value=2, command=self.change)
 
         self.noisetypelabel = ttk.Label(self.label_frame, text="Noise Type:")
         self.noisetypebutton1 = ttk.Radiobutton(self.label_frame, text="[1] Unknown", variable=self.noisetype, value="unknown")
@@ -223,10 +221,11 @@ class Labeler(tk.Tk):
         self.dirButton.pack(side='top', anchor='w', pady=10)
         self.dirinfo1.pack(side='top', anchor='w', pady = 0)
         self.dirinfo2.pack(side='top', anchor='w', pady = 1)
-        self.imageinfo.pack(side='top', anchor='w', pady = 1)
+        #self.imageinfo.pack(side='top', anchor='w', pady = 1)
         self.spacinglabel1.pack(side='top', anchor='w', pady=10)
         self.signalbutton.pack(side='top', anchor='w', pady=0)
         self.noisebutton.pack(side='top', anchor='w', pady=3)
+        self.faultybutton.pack(side='top', anchor='w', pady=0)
         self.noisetypelabel.pack(side='top', anchor='w', pady=2, padx=5)
         self.noisetypebutton1.pack(side='top', anchor='w', pady=2, padx=35)
         self.noisetypebutton2.pack(side='top', anchor='w', pady=2, padx=35)
@@ -274,8 +273,7 @@ if __name__ == '__main__':
 
 #TODO Missing functionality:
 
-#error for unfinished input
-#textfield für direktes ansprechen
-
+#broke images button (faulty)
+#image reihenfolge
 
 #cant read I button basic no such elemt in array
