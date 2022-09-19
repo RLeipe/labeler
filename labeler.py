@@ -81,6 +81,8 @@ class Labeler(tk.Tk):
                     self.signalnoise.set(self.imageDict[self.currentkey]["signal"])
                 if "noisetype" in self.imageDict[self.currentkey]:
                     self.noisetype.set(self.imageDict[self.currentkey]["noisetype"])
+                if "faulty" in self.imageDict[self.currentkey]:
+                    self.faulty.set(self.imageDict[self.currentkey]["faulty"])
 
                 #disable noistype buttons if no noise is preloaded
                 if self.signalnoise.get() != 0:
@@ -92,6 +94,7 @@ class Labeler(tk.Tk):
         if self.signalnoise.get() != -1:
             self.imageDict[self.currentkey]["signal"] = self.signalnoise.get()
         self.imageDict[self.currentkey]["noisetype"] = self.noisetype.get()
+        self.imageDict[self.currentkey]["faulty"] = self.faulty.get()
         out_file = open(self.dir.get() + "/" + self.username.get() + ".json", 'w')
         json.dump(self.imageDict, out_file)
         out_file.close()
@@ -106,6 +109,7 @@ class Labeler(tk.Tk):
         if self.currentkey != "":
             self.imageDict[self.currentkey]["signal"] = self.signalnoise.get()
             self.imageDict[self.currentkey]["noisetype"] = self.noisetype.get()
+            self.imageDict[self.currentkey]["faulty"] = self.faulty.get()
             out_file = open(self.dir.get() + "/" + self.username.get() + ".json", 'w')
             json.dump(self.imageDict, out_file)
             out_file.close()
@@ -116,7 +120,7 @@ class Labeler(tk.Tk):
         if self.signalnoise.get() == 0:
             for noisetype in self.noisetypebuttons:
                 noisetype["state"] = "normal"
-        if self.signalnoise.get() == 1 or self.signalnoise.get() == 2:
+        if self.signalnoise.get() == 1:
             self.noisetype.set("")
             for noisetype in self.noisetypebuttons:
                 noisetype["state"] = "disable"
@@ -153,6 +157,8 @@ class Labeler(tk.Tk):
         self.dir.trace('w', self.loadImages)
         self.signalnoise = tk.IntVar()
         self.signalnoise.set(-1)
+        self.faulty = tk.IntVar()
+        self.faulty.set(0)
         self.imageDict = {}
         self.imagePilList = []
         self.currentkey = ""
@@ -187,7 +193,7 @@ class Labeler(tk.Tk):
 
         self.signalbutton = ttk.Radiobutton(self.label_frame, text="[s] Signal", variable=self.signalnoise, value=1, command=self.change)
         self.noisebutton = ttk.Radiobutton(self.label_frame, text="[n] Noise", variable=self.signalnoise, value=0, command=self.change)
-        self.faultybutton = ttk.Radiobutton(self.label_frame, text="[f] Faulty", variable=self.signalnoise, value=2, command=self.change)
+        self.faultybutton = ttk.Checkbutton(self.label_frame, text="[f] Faulty", variable=self.faulty, onvalue=1, offvalue=0)
 
         self.noisetypelabel = ttk.Label(self.label_frame, text="Noise Type:")
         self.noisetypebutton1 = ttk.Radiobutton(self.label_frame, text="[1] Unknown", variable=self.noisetype, value="unknown")
