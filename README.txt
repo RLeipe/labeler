@@ -16,3 +16,5 @@ username = "labels/josefine/lisa/whatever"
     labels = json.load(l)
 
  - signal = 1 means signal, signal = 0 means noise
+ - faulty = 0 means it is not faulty, 1 means it is (big surprise)
+ noisetype is simply stored as a string (be aware that both empty string and no entry are possible)
