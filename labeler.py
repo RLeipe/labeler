@@ -23,11 +23,8 @@ class Labeler(tk.Tk):
                 # load existing labels
                 with open(self.dir.get() + "/" + self.username.get() + ".json", 'r') as labels:
                     existingDict = json.load(labels)
-                    print(existingDict)
                     for key in existingDict:
-                        print(existingDict[key])
                         self.imageDict[key] = existingDict[key]
-                    print(self.imageDict)
 
         self.dirinfo1.configure(text=self.infoString1)
         self.dirinfo2.configure(text=self.infoString2)
@@ -45,15 +42,10 @@ class Labeler(tk.Tk):
 
 
     def sortDict(self):
-        print("sorting \n \n")
-        print(self.imageDict)
+
         tuples = [(key, self.imageDict[key]) for key in self.imageDict]
-        print(self.imageDict)
         for tuple in tuples:
             if "signal" not in tuple[1].keys():
-                print(tuple)
-                print(tuple[1])
-                print(tuple[1].keys())
                 tuple[1]["signal"] = -1
         self.imageDict = OrderedDict(sorted(tuples, key=lambda x: (x[1]['signal'], int(x[0][:5])), reverse=False))
         self.iterator = iter(self.imageDict)
@@ -62,8 +54,6 @@ class Labeler(tk.Tk):
     def showNextImage(self):
         #reorder dict by amount of labels to show unfinished images first, but only if user has changed something to prevent alternating
         if self.hasChanged.get():
-            print("sorting")
-            print(self.imageDict)
             self.sortDict()
 
         if self.gotoprevious:
@@ -174,6 +164,8 @@ class Labeler(tk.Tk):
         style = ttk.Style(self)
         self.tk.call('source', 'azure.tcl')
         style.theme_use('azure')
+
+        self.attributes("-fullscreen", True)
 
         self.username = tk.StringVar()
         self.username.set("")
@@ -296,6 +288,8 @@ class Labeler(tk.Tk):
         self.bind("7", lambda event: self.noisetypebutton7.invoke())
         self.bind("8", lambda event: self.noisetypebutton8.invoke())
         self.bind("9", lambda event: self.noisetypebutton9.invoke())
+        #bind esc to exit fullscreen:
+        self.bind("<Escape>", lambda event: self.attributes("-fullscreen", False))
 
 
 
