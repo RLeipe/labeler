@@ -42,6 +42,7 @@ class Labeler(tk.Tk):
 
     def sortDict(self):
         tuples = [(key, self.imageDict[key]) for key in self.imageDict]
+        print(self.imageDict)
         for tuple in tuples:
             if "signal" not in tuple[1].keys():
                 print(tuple)
