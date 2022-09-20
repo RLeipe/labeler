@@ -42,15 +42,13 @@ class Labeler(tk.Tk):
 
     def sortDict(self):
         tuples = [(key, self.imageDict[key]) for key in self.imageDict]
-        print(tuples)
         for tuple in tuples:
             if "signal" not in tuple[1].keys():
-                print(tuple[0])
+                print(tuple)
                 print(tuple[1])
                 print(tuple[1].keys())
                 tuple[1]["signal"] = -1
         self.imageDict = OrderedDict(sorted(tuples, key=lambda x: (x[1]['signal'], int(x[0][:5])), reverse=False))
-        print(self.imageDict)
         self.iterator = iter(self.imageDict)
         self.hasChanged.set(False)
 
