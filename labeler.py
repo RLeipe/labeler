@@ -19,11 +19,9 @@ class Labeler(tk.Tk):
                 self.imageDict[os.path.splitext(f)[0]] = {}
                 self.imagePilList.append(Image.open(os.path.join(path, f)))
             elif f == self.username.get() + ".json":
-                print(f)
                 # load existing labels
                 with open(self.dir.get() + "/" + self.username.get() + ".json", 'r') as labels:
                     existingDict = json.load(labels)
-                    print(existingDict)
                     for key in existingDict:
                         self.imageDict[key] = existingDict[key]
 
@@ -44,10 +42,12 @@ class Labeler(tk.Tk):
 
     def sortDict(self):
         tuples = [(key, self.imageDict[key]) for key in self.imageDict]
+        print(tuples)
         for tuple in tuples:
             if "signal" not in tuple[1]:
                 tuple[1]["signal"] = -1
         self.imageDict = OrderedDict(sorted(tuples, key=lambda x: (x[1]['signal'], int(x[0][:5])), reverse=False))
+        print(self.imageDict)
         self.iterator = iter(self.imageDict)
         self.hasChanged.set(False)
 
