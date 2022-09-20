@@ -22,7 +22,9 @@ class Labeler(tk.Tk):
                 # load existing labels
                 with open(self.dir.get() + "/" + self.username.get() + ".json", 'r') as labels:
                     existingDict = json.load(labels)
+                    print(existingDict)
                     for key in existingDict:
+                        print(existingDict[key])
                         self.imageDict[key] = existingDict[key]
 
         self.dirinfo1.configure(text=self.infoString1)
