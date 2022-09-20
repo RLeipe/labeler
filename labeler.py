@@ -1,8 +1,7 @@
 import json
 import pdb
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import ttk
+from tkinter import filedialog, ttk, messagebox
 import os, os.path
 from PIL import Image, ImageTk
 from collections import OrderedDict
@@ -30,9 +29,16 @@ class Labeler(tk.Tk):
         self.dirinfo2.configure(text=self.infoString2)
         self.showNextImage()
 
+    def checkSelectDir(self):
+        if self.username.get() == "":
+            messagebox.showerror("Error", "Please enter a username!")
+        else:
+            self.selectDir()
+
     def selectDir(self):
         filepath = filedialog.askdirectory()
         self.dir.set(filepath)
+
 
     def sortDict(self):
         tuples = [(key, self.imageDict[key]) for key in self.imageDict]
@@ -132,8 +138,6 @@ class Labeler(tk.Tk):
                 noisetype["state"] = "disable"
 
 
-
-
     def updateInfoString(self):
         #default for when no dir has been selected
         if self.dir.get() == "":
@@ -160,7 +164,7 @@ class Labeler(tk.Tk):
         style.theme_use('azure')
 
         self.username = tk.StringVar()
-        self.username.set("labels")
+        self.username.set("")
         self.dir = tk.StringVar()
         self.dir.set("")
         self.dir.trace('w', self.loadImages)
@@ -198,7 +202,7 @@ class Labeler(tk.Tk):
         self.nameentrylabel = ttk.Label(self.user_frame, text="Username:")
         self.nameentry = tk.Entry(self.user_frame, textvariable=self.username)
 
-        self.dirButton = ttk.Button(self.label_frame, text="Select Image Directory", command=self.selectDir)
+        self.dirButton = ttk.Button(self.label_frame, text="Select Image Directory", command=self.checkSelectDir)
         self.dirinfo1 = ttk.Label(self.label_frame, text=self.infoString1)
         self.dirinfo2 = ttk.Label(self.label_frame, text=self.infoString2)
 
@@ -290,9 +294,5 @@ if __name__ == '__main__':
 
 #TODO Missing functionality:
 
-#broke images button (faulty)
-#image reihenfolge
-#sorting
-#image progress
 
 #cant read I button basic no such elemt in array
