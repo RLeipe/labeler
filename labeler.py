@@ -19,9 +19,11 @@ class Labeler(tk.Tk):
                 self.imageDict[os.path.splitext(f)[0]] = {}
                 self.imagePilList.append(Image.open(os.path.join(path, f)))
             elif f == self.username.get() + ".json":
+                print(f)
                 # load existing labels
                 with open(self.dir.get() + "/" + self.username.get() + ".json", 'r') as labels:
                     existingDict = json.load(labels)
+                    print(existingDict)
                     for key in existingDict:
                         self.imageDict[key] = existingDict[key]
 
