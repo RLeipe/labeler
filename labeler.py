@@ -12,11 +12,12 @@ class Labeler(tk.Tk):
     def loadImages(self, *args):
         path = self.dir.get()
         self.valid_imagetypes = [".jpg", ".gif", ".png"]
-
+        existingDict = False
         for f in os.listdir(path):
             ext = os.path.splitext(f)[1]
             if ext.lower() in self.valid_imagetypes:
-                self.imageDict[os.path.splitext(f)[0]] = {}
+                if not existingDict:
+                    self.imageDict[os.path.splitext(f)[0]] = {}
                 self.imagePilList.append(Image.open(os.path.join(path, f)))
             elif f == self.username.get() + ".json":
                 # load existing labels
@@ -61,6 +62,8 @@ class Labeler(tk.Tk):
     def showNextImage(self):
         #reorder dict by amount of labels to show unfinished images first, but only if user has changed something to prevent alternating
         if self.hasChanged.get():
+            print("sorting")
+            print(self.imageDict)
             self.sortDict()
 
         if self.gotoprevious:
