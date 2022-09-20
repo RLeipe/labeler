@@ -26,7 +26,6 @@ class Labeler(tk.Tk):
                     for key in existingDict:
                         self.imageDict[key] = existingDict[key]
 
-        self.infoString1, self.infoString2 = self.updateInfoString()
         self.dirinfo1.configure(text=self.infoString1)
         self.dirinfo2.configure(text=self.infoString2)
         self.showNextImage()
@@ -37,8 +36,10 @@ class Labeler(tk.Tk):
 
     def sortDict(self):
         tuples = [(key, self.imageDict[key]) for key in self.imageDict]
-
-        self.imageDict = OrderedDict(sorted(tuples, key=lambda x: (len(x[1]), int(x[0][:5])), reverse=False))
+        for tuple in tuples:
+            if "signal" not in tuple[1]:
+                tuple[1]["signal"] = -1
+        self.imageDict = OrderedDict(sorted(tuples, key=lambda x: (x[1]['signal'], int(x[0][:5])), reverse=False))
         self.iterator = iter(self.imageDict)
         self.hasChanged.set(False)
 
@@ -59,6 +60,8 @@ class Labeler(tk.Tk):
                     self.currentkey = next(self.iterator)
             except StopIteration as stop:
                 self.sortDict()
+        #update info strings here to make sure currentkey is set
+        self.updateInfoString()
 
         for type in self.valid_imagetypes:
 
@@ -84,6 +87,8 @@ class Labeler(tk.Tk):
                     self.noisetype.set(self.imageDict[self.currentkey]["noisetype"])
                 if "faulty" in self.imageDict[self.currentkey]:
                     self.faulty.set(self.imageDict[self.currentkey]["faulty"])
+                else:
+                    self.faulty.set(0)
 
                 #disable noistype buttons if no noise is preloaded
                 if self.signalnoise.get() != 0:
@@ -132,15 +137,18 @@ class Labeler(tk.Tk):
     def updateInfoString(self):
         #default for when no dir has been selected
         if self.dir.get() == "":
-            infoString1 = "No Directory Selected"
-            infoString2 = "Images: -"
+            self.infoString1 = "No Directory Selected"
+            self.infoString2 = "Images: -"
 
-        #
+
         else:
-            imagecount = len([f for f in os.listdir(self.dir.get()) if f.endswith('.png') or f.endswith('.jpg') or f.endswith('.gif')])
-            infoString1 = "Directory: " + self.dir.get()
-            infoString2 = "Images: " + str(imagecount)
-        return infoString1, infoString2
+            if self.imagecount == 0:
+                self.imagecount = len([f for f in os.listdir(self.dir.get()) if f.endswith('.png') or f.endswith('.jpg') or f.endswith('.gif')])
+            self.infoString1 = "Directory: " + self.dir.get()
+            self.infoString2 = "Image: " + str(int(self.currentkey[:5])) + "/" + str(self.imagecount)
+            self.dirinfo1.configure(text=self.infoString1)
+            self.dirinfo2.configure(text=self.infoString2)
+
 
     def __init__(self):
         super().__init__()
@@ -167,8 +175,10 @@ class Labeler(tk.Tk):
         self.noisetype = tk.StringVar()
         self.hasChanged = tk.BooleanVar()
         self.hasChanged.set(True)
-        self.infoString1, self.infoString2 = self.updateInfoString()
+        self.infoString1, self.infoString2 = "", ""
+        self.updateInfoString()
         self.gotoprevious = False
+        self.imagecount = 0
 
         #only boring layouting beyond this point
 
@@ -282,5 +292,7 @@ if __name__ == '__main__':
 
 #broke images button (faulty)
 #image reihenfolge
+#sorting
+#image progress
 
 #cant read I button basic no such elemt in array
