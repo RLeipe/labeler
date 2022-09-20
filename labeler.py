@@ -103,8 +103,8 @@ class Labeler(tk.Tk):
                 break
 
     def save(self):
-        if self.signalnoise.get() != -1:
-            self.imageDict[self.currentkey]["signal"] = self.signalnoise.get()
+
+        self.imageDict[self.currentkey]["signal"] = self.signalnoise.get()
         self.imageDict[self.currentkey]["noisetype"] = self.noisetype.get()
         self.imageDict[self.currentkey]["faulty"] = self.faulty.get()
         out_file = open(self.dir.get() + "/" + self.username.get() + ".json", 'w')
