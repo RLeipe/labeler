@@ -26,6 +26,7 @@ class Labeler(tk.Tk):
                     for key in existingDict:
                         print(existingDict[key])
                         self.imageDict[key] = existingDict[key]
+                    print(self.imageDict)
 
         self.dirinfo1.configure(text=self.infoString1)
         self.dirinfo2.configure(text=self.infoString2)
@@ -43,6 +44,8 @@ class Labeler(tk.Tk):
 
 
     def sortDict(self):
+        print("sorting \n \n")
+        print(self.imageDict)
         tuples = [(key, self.imageDict[key]) for key in self.imageDict]
         print(self.imageDict)
         for tuple in tuples:
